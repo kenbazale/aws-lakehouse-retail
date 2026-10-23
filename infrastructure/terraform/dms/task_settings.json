@@ -1,0 +1,27 @@
+{
+  "TargetMetadata": {
+    "SupportLobs": true,
+    "FullLobMode": false,
+    "LobMaxSize": 32,
+    "LimitedSizeLobMode": true
+  },
+  "FullLoadSettings": {
+    "TargetTablePrepMode": "DO_NOTHING",
+    "MaxFullLoadSubTasks": 8,
+    "CommitRate": 10000
+  },
+  "Logging": {
+    "EnableLogging": true,
+    "LogComponents": [
+      { "Id": "SOURCE_UNLOAD", "Severity": "LOGGER_SEVERITY_DEFAULT" },
+      { "Id": "TARGET_LOAD", "Severity": "LOGGER_SEVERITY_DEFAULT" },
+      { "Id": "SOURCE_CAPTURE", "Severity": "LOGGER_SEVERITY_DEFAULT" },
+      { "Id": "TARGET_APPLY", "Severity": "LOGGER_SEVERITY_DEFAULT" }
+    ]
+  },
+  "ErrorBehavior": {
+    "DataErrorPolicy": "LOG_ERROR",
+    "TableErrorPolicy": "SUSPEND_TABLE",
+    "FailOnNoTablesCaptured": true
+  }
+}
