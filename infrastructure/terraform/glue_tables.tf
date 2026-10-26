@@ -19,7 +19,7 @@ resource "aws_glue_catalog_table" "bronze_purchases_full_load" {
   }
 
   storage_descriptor {
-    location      = "s3://${local.bronze_bucket}/cdc/purchases/public/purchases/LOAD00000001.parquet"
+    location      = "s3://${local.bronze_bucket}/cdc/purchases/public/purchases/load/"
     input_format  = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
     output_format = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
 
@@ -66,7 +66,7 @@ resource "aws_glue_catalog_table" "bronze_purchases_full_load" {
 }
 
 # ---------------------------------------------------------------
-# bronze_purchases_cdc
+# bronze_purchases_cdc (partitioned, with partition projection)
 # ---------------------------------------------------------------
 resource "aws_glue_catalog_table" "bronze_purchases_cdc" {
   name          = "bronze_purchases_cdc"
@@ -78,6 +78,21 @@ resource "aws_glue_catalog_table" "bronze_purchases_cdc" {
     "parquet.compression" = "GZIP"
     "classification"      = "parquet"
     "typeOfData"          = "file"
+
+    # --- partition projection (avoids MSCK REPAIR) ---
+    "projection.enabled"        = "true"
+    "projection.year.type"      = "integer"
+    "projection.year.range"     = "2024,2030"
+    "projection.month.type"     = "integer"
+    "projection.month.range"    = "1,12"
+    "projection.month.digits"   = "2"
+    "projection.day.type"       = "integer"
+    "projection.day.range"      = "1,31"
+    "projection.day.digits"     = "2"
+    "projection.hour.type"      = "integer"
+    "projection.hour.range"     = "0,23"
+    "projection.hour.digits"    = "2"
+    "storage.location.template" = "s3://${local.bronze_bucket}/cdc/purchases/public/purchases/$${year}/$${month}/$${day}/$${hour}/"
   }
 
   partition_keys {
