@@ -1,0 +1,10 @@
+Rules = [
+    IsComplete "purchase_id",
+    IsUnique "purchase_id",
+    IsComplete "customer_id",
+    IsComplete "product_id",
+    ColumnValues "amount" > 0,
+    ColumnValues "currency" in ["USD","EUR","GBP","JPY"],
+    ColumnValues "purchase_ts" <= now(),
+    RowCount > 0
+]

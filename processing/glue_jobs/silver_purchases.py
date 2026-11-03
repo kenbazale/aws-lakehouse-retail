@@ -93,4 +93,51 @@ WHEN NOT MATCHED THEN INSERT *
 count = spark.sql(f"SELECT COUNT(*) AS c FROM {table}").collect()[0]["c"]
 print(f"✅ silver_purchases rows: {count}")
 
+
+# ---------- Data Quality Gate ----------
+import boto3
+from urllib.parse import urlparse
+
+from awsgluedq.transforms import EvaluateDataQuality
+from awsglue.dynamicframe import DynamicFrame
+
+# Glue DQ requires DynamicFrame, not Spark DataFrame
+dq_input_df = spark.sql(f"SELECT * FROM {table}")
+dq_input = DynamicFrame.fromDF(dq_input_df, glueContext, "dq_input")
+
+dq_ruleset_uri = "s3://retail-lakehouse-dev-scripts-[AWS_ACCOUNT_ID]/quality/silver_purchases_rules.dqdl"
+dq_ruleset_location = urlparse(dq_ruleset_uri)
+if dq_ruleset_location.scheme != "s3" or not dq_ruleset_location.netloc or not dq_ruleset_location.path.lstrip("/"):
+    raise ValueError(f"Invalid DQ ruleset S3 URI: {dq_ruleset_uri}")
+
+dq_ruleset = boto3.client("s3").get_object(
+    Bucket=dq_ruleset_location.netloc,
+    Key=dq_ruleset_location.path.lstrip("/"),
+)["Body"].read().decode("utf-8")
+
+dq_results = EvaluateDataQuality().process_rows(
+    frame=dq_input,
+    ruleset=dq_ruleset,
+    publishing_options={
+        "dataQualityEvaluationContext": "silver_purchases",
+        "enableDataQualityCloudWatchMetrics": True,
+        "enableDataQualityResultsPublishing": True,
+    },
+    additional_options={
+        "performanceTuning.caching": "CACHE_NOTHING"
+    },
+)
+
+# The result is a DynamicFrameCollection. Extract ruleOutcomes.
+rule_outcomes = dq_results.select("ruleOutcomes").toDF()
+failed = rule_outcomes.filter("Outcome = 'Failed'").count()
+total = rule_outcomes.count()
+if failed > 0:
+    print(f"❌ DQ FAILED: {failed}/{total} rules")
+    for r in rule_outcomes.filter("Outcome = 'Failed'").collect():
+        d = r.asDict()
+        print(f"   - {d.get('Rule')}: {d.get('FailureReason')}")
+    raise Exception(f"Data quality gate failed: {failed} of {total} rules")
+print(f"✅ DQ passed: {total} rules")
+
 job.commit()
