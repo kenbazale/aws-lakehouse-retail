@@ -22,7 +22,10 @@ db = args["CATALOG_DB"]
 silver_db = "retail_lakehouse_dev_silver"
 
 purchases = spark.table(f"glue_catalog.{silver_db}.silver_purchases")
-customers = spark.table("glue_catalog.retail_lakehouse_dev_bronze.bronze_customers")  # note: customers still in bronze db
+# bronze_customers is a Parquet EXTERNAL_TABLE (not Iceberg), so read directly from S3
+customers = spark.read.parquet(
+    "s3://retail-lakehouse-dev-bronze-[AWS_ACCOUNT_ID]/cdc/purchases/public/customers/"
+)
 weather = spark.table(f"glue_catalog.{silver_db}.silver_weather")
 reviews = spark.table(f"glue_catalog.{silver_db}.silver_reviews")
 
