@@ -1,0 +1,33 @@
+# Terraform working data and local variables
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+/infrastructure/terraform/tfplan
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Local environment and credentials
+**/env.sh
+.env
+.env.*
+!.env.example
+
+# Generated Python files
+__pycache__/
+*.py[cod]
+
+# Downloaded installers and local OS/editor files
+*.deb
+.DS_Store
+.vscode/
+
+# Local operational snapshots may contain account details or credentials
+/docs/session-2-status.md
+/docs/state-20261023.txt

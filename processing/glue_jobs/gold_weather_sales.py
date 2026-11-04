@@ -5,7 +5,10 @@ from awsglue.job import Job
 from pyspark.context import SparkContext
 from pyspark.sql import functions as F
 
-args = getResolvedOptions(sys.argv, ["JOB_NAME", "SILVER_PATH", "GOLD_PATH", "CATALOG_DB"])
+args = getResolvedOptions(
+    sys.argv,
+    ["JOB_NAME", "SILVER_PATH", "GOLD_PATH", "BRONZE_PATH", "SILVER_DB", "CATALOG_DB"],
+)
 
 sc = SparkContext()
 glueContext = GlueContext(sc)
@@ -19,12 +22,12 @@ spark.conf.set("spark.sql.catalog.glue_catalog.catalog-impl", "org.apache.iceber
 spark.conf.set("spark.sql.catalog.glue_catalog.io-impl", "org.apache.iceberg.aws.s3.S3FileIO")
 
 db = args["CATALOG_DB"]
-silver_db = "retail_lakehouse_dev_silver"
+silver_db = args["SILVER_DB"]
 
 purchases = spark.table(f"glue_catalog.{silver_db}.silver_purchases")
 # bronze_customers is a Parquet EXTERNAL_TABLE (not Iceberg), so read directly from S3
 customers = spark.read.parquet(
-    "s3://retail-lakehouse-dev-bronze-[AWS_ACCOUNT_ID]/cdc/purchases/public/customers/"
+    f"{args['BRONZE_PATH']}cdc/purchases/public/customers/"
 )
 weather = spark.table(f"glue_catalog.{silver_db}.silver_weather")
 reviews = spark.table(f"glue_catalog.{silver_db}.silver_reviews")

@@ -5,17 +5,14 @@
 # --- Subnet group: reuse the two private subnets DMS already uses ---
 resource "aws_db_subnet_group" "retail" {
   name = "${var.project}-${var.env}-rds-subnet"
-  subnet_ids = [
-    "[AWS_RESOURCE_ID]",
-    "[AWS_RESOURCE_ID]",
-  ]
+  subnet_ids = var.private_subnet_ids
 }
 
 # --- Security group: allow DMS SG to reach Postgres ---
 resource "aws_security_group" "rds" {
   name        = "${var.project}-${var.env}-rds"
   description = "RDS PostgreSQL for retail-lakehouse CDC source"
-  vpc_id      = "[AWS_RESOURCE_ID]"
+  vpc_id      = var.vpc_id
 
   ingress {
     description     = "Postgres from DMS replication instance"
@@ -43,7 +40,7 @@ resource "aws_secretsmanager_secret_version" "rds_master" {
   secret_id = aws_secretsmanager_secret.rds_master.id
   secret_string = jsonencode({
     username = "retailadmin"
-    password = "[REDACTED]" # change if you like
+    password = var.rds_master_password
     database = "retail"
   })
 }
@@ -83,7 +80,7 @@ resource "aws_db_instance" "retail" {
 
   db_name  = "retail"
   username = "retailadmin"
-  password = "[REDACTED]"
+  password = var.rds_master_password
 
   db_subnet_group_name   = aws_db_subnet_group.retail.name
   vpc_security_group_ids = [aws_security_group.rds.id]

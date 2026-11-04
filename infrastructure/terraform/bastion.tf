@@ -29,7 +29,7 @@ resource "aws_iam_instance_profile" "bastion" {
 resource "aws_security_group" "bastion" {
   name        = "${var.project}-${var.env}-bastion-sg"
   description = "SSM bastion - no inbound, outbound only"
-  vpc_id      = "[AWS_RESOURCE_ID]"
+  vpc_id      = var.vpc_id
 
   egress {
     from_port   = 0
@@ -67,7 +67,7 @@ data "aws_ami" "al2023" {
 resource "aws_instance" "bastion" {
   ami                    = data.aws_ami.al2023.id
   instance_type          = "t3.nano"
-  subnet_id              = "[AWS_RESOURCE_ID]"     # same private subnet as RDS
+  subnet_id              = var.private_subnet_ids[0]
   vpc_security_group_ids = [aws_security_group.bastion.id]
   iam_instance_profile   = aws_iam_instance_profile.bastion.name
 

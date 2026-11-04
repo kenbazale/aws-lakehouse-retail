@@ -6,7 +6,10 @@ from pyspark.context import SparkContext
 from pyspark.sql import functions as F
 from pyspark.sql.types import DecimalType
 
-args = getResolvedOptions(sys.argv, ["JOB_NAME", "SILVER_PATH", "CATALOG_DB"])
+args = getResolvedOptions(
+    sys.argv,
+    ["JOB_NAME", "SILVER_PATH", "BRONZE_PATH", "SCRIPTS_PATH", "CATALOG_DB"],
+)
 
 sc = SparkContext()
 glueContext = GlueContext(sc)
@@ -25,11 +28,11 @@ table = f"glue_catalog.{db}.silver_purchases"
 
 # ---- Read bronze data ----
 full_load = spark.read.parquet(
-    "s3://retail-lakehouse-dev-bronze-[AWS_ACCOUNT_ID]/cdc/purchases/public/purchases/load/"
+    f"{args['BRONZE_PATH']}cdc/purchases/public/purchases/load/"
 )
 
 # Read all dated partition folders (2026/10/23/09/...)
-cdc_base = "s3://retail-lakehouse-dev-bronze-[AWS_ACCOUNT_ID]/cdc/purchases/public/purchases/"
+cdc_base = f"{args['BRONZE_PATH']}cdc/purchases/public/purchases/"
 try:
     cdc = spark.read.option("recursiveFileLookup", "true").parquet(
         f"{cdc_base}2026/"
@@ -105,7 +108,7 @@ from awsglue.dynamicframe import DynamicFrame
 dq_input_df = spark.sql(f"SELECT * FROM {table}")
 dq_input = DynamicFrame.fromDF(dq_input_df, glueContext, "dq_input")
 
-dq_ruleset_uri = "s3://retail-lakehouse-dev-scripts-[AWS_ACCOUNT_ID]/quality/silver_purchases_rules.dqdl"
+dq_ruleset_uri = f"{args['SCRIPTS_PATH']}quality/silver_purchases_rules.dqdl"
 dq_ruleset_location = urlparse(dq_ruleset_uri)
 if dq_ruleset_location.scheme != "s3" or not dq_ruleset_location.netloc or not dq_ruleset_location.path.lstrip("/"):
     raise ValueError(f"Invalid DQ ruleset S3 URI: {dq_ruleset_uri}")

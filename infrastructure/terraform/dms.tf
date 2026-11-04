@@ -37,7 +37,7 @@ resource "aws_dms_endpoint" "postgres_source" {
   port          = 5432
   database_name = "retail"
   username      = "dms_user"
-  password      = "[REDACTED]"              # ← CHANGED (we'll create this user post-apply)
+  password      = var.dms_password
   ssl_mode      = "require"
 }
 

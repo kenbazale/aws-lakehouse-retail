@@ -2,7 +2,7 @@
 resource "aws_security_group" "redshift" {
   name        = "${var.project}-${var.env}-redshift-sg"
   description = "Redshift Serverless - bastion access only"
-  vpc_id      = "[AWS_RESOURCE_ID]"
+  vpc_id      = var.vpc_id
 
   # Allow the bastion to connect on 5439
   ingress {

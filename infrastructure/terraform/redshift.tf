@@ -51,7 +51,7 @@ resource "aws_iam_role_policy" "redshift_spectrum" {
 resource "aws_redshiftserverless_namespace" "main" {
   namespace_name       = "${var.project}-${var.env}"
   admin_username       = "adminuser"
-  admin_user_password  = "[REDACTED]"
+  admin_user_password  = var.redshift_admin_password
   db_name              = "dev"
   iam_roles            = [aws_iam_role.redshift_spectrum.arn]
   default_iam_role_arn = aws_iam_role.redshift_spectrum.arn

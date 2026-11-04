@@ -5,7 +5,9 @@ from awsglue.job import Job
 from pyspark.context import SparkContext
 from pyspark.sql import functions as F
 
-args = getResolvedOptions(sys.argv, ["JOB_NAME", "SILVER_PATH", "CATALOG_DB"])
+args = getResolvedOptions(
+    sys.argv, ["JOB_NAME", "SILVER_PATH", "BRONZE_PATH", "CATALOG_DB"]
+)
 
 sc = SparkContext()
 glueContext = GlueContext(sc)
@@ -22,7 +24,7 @@ db = args["CATALOG_DB"]
 table = f"glue_catalog.{db}.silver_reviews"
 
 raw = spark.read.option("recursiveFileLookup", "true").json(
-    "s3://retail-lakehouse-dev-bronze-[AWS_ACCOUNT_ID]/raw/reviews/"
+    f"{args['BRONZE_PATH']}raw/reviews/"
 )
 
 # reviews is an array — explode

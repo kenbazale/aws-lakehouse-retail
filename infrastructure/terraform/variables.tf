@@ -26,15 +26,22 @@ variable "private_subnet_ids" {
   description = "At least two subnet IDs in different AZs for the DMS subnet group"
 }
 
-variable "rds_endpoint" {
-  type        = string
-  description = "PostgreSQL hostname (RDS endpoint) used as the DMS source"
-}
-
 variable "dms_password" {
   type        = string
   sensitive   = true
   description = "Password for the dms_user on the source database"
+}
+
+variable "rds_master_password" {
+  type        = string
+  sensitive   = true
+  description = "Master password for the RDS PostgreSQL instance"
+}
+
+variable "redshift_admin_password" {
+  type        = string
+  sensitive   = true
+  description = "Administrator password for the Redshift Serverless namespace"
 }
 
 variable "dms_instance_class" {

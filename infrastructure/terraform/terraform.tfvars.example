@@ -1,0 +1,8 @@
+project           = "retail-lakehouse"
+env               = "dev"
+region            = "us-east-1"
+vpc_id            = "vpc-REPLACE_ME"
+private_subnet_ids = ["subnet-REPLACE_ME_1", "subnet-REPLACE_ME_2"]
+
+# Supply dms_password, rds_master_password, and redshift_admin_password
+# securely through Terraform prompts or TF_VAR_* environment variables.

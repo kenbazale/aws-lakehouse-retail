@@ -61,6 +61,8 @@ resource "aws_iam_role_policy" "glue_etl" {
 
 # ---------- Glue jobs ----------
 locals {
+  bronze_path      = "s3://${aws_s3_bucket.lakehouse["bronze"].id}/"
+  scripts_path     = "s3://${aws_s3_bucket.lakehouse["scripts"].id}/"
   glue_script_base = "s3://${aws_s3_bucket.lakehouse["scripts"].id}/glue"
   silver_path      = "s3://${aws_s3_bucket.lakehouse["silver"].id}/"
   silver_db        = "retail_lakehouse_${var.env}_silver"
@@ -84,6 +86,8 @@ resource "aws_glue_job" "silver_purchases" {
   default_arguments = {
     "--job-language"        = "python"
     "--SILVER_PATH"         = local.silver_path
+    "--BRONZE_PATH"         = local.bronze_path
+    "--SCRIPTS_PATH"        = local.scripts_path
     "--CATALOG_DB"          = local.silver_db
     "--enable-auto-scaling" = "true"
     "--datalake-formats"    = "iceberg"
@@ -108,6 +112,7 @@ resource "aws_glue_job" "silver_weather" {
   default_arguments = {
     "--job-language"        = "python"
     "--SILVER_PATH"         = local.silver_path
+    "--BRONZE_PATH"         = local.bronze_path
     "--CATALOG_DB"          = local.silver_db
     "--enable-auto-scaling" = "true"
     "--datalake-formats"    = "iceberg"
@@ -132,6 +137,7 @@ resource "aws_glue_job" "silver_reviews" {
   default_arguments = {
     "--job-language"        = "python"
     "--SILVER_PATH"         = local.silver_path
+    "--BRONZE_PATH"         = local.bronze_path
     "--CATALOG_DB"          = local.silver_db
     "--enable-auto-scaling" = "true"
     "--datalake-formats"    = "iceberg"
@@ -156,6 +162,8 @@ resource "aws_glue_job" "gold_weather_sales" {
   default_arguments = {
     "--job-language"        = "python"
     "--SILVER_PATH"         = local.silver_path
+    "--BRONZE_PATH"         = local.bronze_path
+    "--SILVER_DB"           = local.silver_db
     "--GOLD_PATH"           = "s3://${aws_s3_bucket.lakehouse["gold"].id}/"
     "--CATALOG_DB"          = local.gold_db
     "--enable-auto-scaling" = "true"
