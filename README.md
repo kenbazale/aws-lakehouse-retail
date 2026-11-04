@@ -2,7 +2,7 @@
 
 An AWS data-lakehouse project that ingests retail purchases, weather observations, and product reviews; transforms them into Apache Iceberg tables; and makes the results queryable with Athena and Amazon Redshift Spectrum.
 
-> **Before sharing this repository:** credentials were previously committed in its Git history. Rotating them and cleaning the history are still required before publishing; see the security note at the end.
+> **Before sharing this repository:** credentials were previously committed in its Git history, which has now been rewritten. Rotate all previously committed credentials before publishing; a history rewrite does not revoke them or clean up copies in old clones.
 
 ## Architecture
 
@@ -106,9 +106,8 @@ See [`docs/project-overview.md`](docs/project-overview.md) for additional contex
 
 ## Before publishing
 
-The previous Git history contains credentials and a large Terraform provider
-binary. The current working tree excludes sensitive local files, but that does
-not remove their historical versions. Rotate any credentials that were ever
-committed, then rewrite the repository history before pushing it to a public
-GitHub repository. History rewriting changes commit IDs and requires a
-force-push; coordinate with collaborators and ensure you have a backup first.
+The local history was rewritten to remove the previously committed credentials
+and generated Terraform artifacts. Rotate any credentials that were ever
+committed before publishing; rewriting history does not revoke them or clean
+copies in old clones. If replacing an existing remote, coordinate with
+collaborators before force-pushing the rewritten history.
